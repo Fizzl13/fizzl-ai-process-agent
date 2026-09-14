@@ -35,3 +35,9 @@ Use Node 18+ and start command `npm start`. Add `ANTHROPIC_API_KEY` and optional
 Financial complaint intents such as `klacht_over_onterechte_afschrijving` are treated as HIGH risk.
 The LLM may classify the case, but the deterministic Decision Engine controls the risk level and
 keeps financial/subscription execution blocked until human review.
+
+
+## v1.0.2 action-plan metadata fix
+
+High-risk policy checks use the explicit `POLICY_CHECK` action type and
+carry the correct HIGH risk, human-review requirement, and REQUIRED status.

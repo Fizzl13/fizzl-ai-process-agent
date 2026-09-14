@@ -23,3 +23,16 @@ test('low confidence is reviewed even when otherwise low risk',()=>{
   assert.equal(d.risk,'LOW');
   assert.equal(d.humanRequired,true);
 });
+
+test('high-risk policy check keeps correct action metadata',()=>{
+  const d=buildDecision({
+    category:'facturatie',
+    intent:'klacht_over_onterechte_afschrijving',
+    confidence:.85
+  });
+  const a=buildActionPlan({intent:'klacht_over_onterechte_afschrijving'},d);
+  assert.equal(a[2].type,'POLICY_CHECK');
+  assert.equal(a[2].risk,'HIGH');
+  assert.equal(a[2].requiresHuman,true);
+  assert.equal(a[2].status,'REQUIRED');
+});

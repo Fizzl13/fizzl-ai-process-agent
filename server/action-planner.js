@@ -51,8 +51,10 @@ function buildActionPlan(caseData = {}, decision = {}) {
     action(
       'A3',
       'Controleer toepasselijke regels',
-      risk === 'HIGH' ? 'HIGH' : 'LOW',
-      risk === 'HIGH'
+      'POLICY_CHECK',
+      risk,
+      risk === 'HIGH',
+      risk === 'HIGH' ? 'REQUIRED' : 'PENDING'
     )
   ];
 
