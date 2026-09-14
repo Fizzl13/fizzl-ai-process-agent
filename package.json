@@ -1,6 +1,6 @@
 {
   "name": "fizzl-ai-process-agent",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "AI-powered business process automation agent with human-in-the-loop decision making.",
   "main": "server/api.js",
   "scripts": {"start":"node server/api.js","test":"node --test tests/process-agent.test.js"},

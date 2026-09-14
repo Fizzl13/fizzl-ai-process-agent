@@ -46,7 +46,13 @@ async function processCase({ message, knowledgeBase }) {
   auditLog.push({event:'KNOWLEDGE_RETRIEVED', at:new Date().toISOString(), count:knowledge.length});
   const decision = buildDecision(analysis);
   auditLog.push({event:'RISK_ASSESSED', at:new Date().toISOString(), risk:decision.risk});
-  const actions = buildActionPlan(analysis, decision);
+  let actions = buildActionPlan(analysis, decision);
+  // Reflect the actual workflow state in the UI: analysis and retrieval are
+  // already completed when the case reaches the review stage.
+  actions = actions.map(a => {
+    if (a.id === 'A1' || a.id === 'A2') return {...a, status:'COMPLETED'};
+    return a;
+  });
   auditLog.push({event:'ACTION_PLAN_CREATED', at:new Date().toISOString(), actions:actions.length});
   const status = decision.humanRequired ? 'AWAITING_HUMAN_REVIEW' : 'READY_FOR_HUMAN_CHECK';
   return { caseId, status, message, analysis, knowledge, decision, actions, execution:{allowed:false, mode:'DEMO_ONLY'}, auditLog };
