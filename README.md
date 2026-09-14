@@ -46,3 +46,8 @@ carry the correct HIGH risk, human-review requirement, and REQUIRED status.
 ## v1.1.0 — Human-friendly workflow UI
 
 The interface now presents the agent workflow in plain Dutch for non-technical users. Technical action types remain available under a collapsible developer section. The UI also shows risk, human approval requirements, execution state, and an audit trail. A1/A2 are marked completed after processing so the displayed workflow matches the actual case state.
+
+
+## v1.2.0 — Human approval & audit trail
+
+The demo now records who approved a high-risk case and why. The UI asks for a reviewer name and approval reason before the simulated execution gate can be opened. No real financial or subscription action is executed.

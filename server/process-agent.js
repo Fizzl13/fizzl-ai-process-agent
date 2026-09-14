@@ -58,12 +58,17 @@ async function processCase({ message, knowledgeBase }) {
   return { caseId, status, message, analysis, knowledge, decision, actions, execution:{allowed:false, mode:'DEMO_ONLY'}, auditLog };
 }
 
-function approveCase(result) {
+function approveCase(result, approval = {}) {
   if (!result || !result.caseId) throw new Error('Invalid case');
   if (!result.decision || !result.decision.humanRequired) {
     throw new Error('HUMAN_REVIEW_NOT_REQUIRED');
   }
-  result.auditLog.push({event:'HUMAN_APPROVED', at:new Date().toISOString()});
+  const reviewer = String(approval.reviewer || 'Demo reviewer').trim().slice(0,80);
+  const reason = String(approval.reason || 'Goedgekeurd voor demo-uitvoering.').trim().slice(0,300);
+  if (!reviewer) throw new Error('REVIEWER_REQUIRED');
+  if (!reason) throw new Error('APPROVAL_REASON_REQUIRED');
+  result.approval = { reviewer, reason, approvedAt:new Date().toISOString() };
+  result.auditLog.push({event:'HUMAN_APPROVED', at:result.approval.approvedAt, reviewer, reason});
   result.status = 'APPROVED_DEMO_EXECUTION';
   result.execution = { allowed:true, mode:'DEMO_ONLY', result:'SIMULATED_SUCCESS' };
   result.actions = result.actions.map(a => a.type === 'EXECUTE_ACTION' ? {...a, status:'SIMULATED'} : a);

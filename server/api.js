@@ -17,7 +17,7 @@ const server=http.createServer(async (req,res)=>{
     if(req.method==='GET' && (req.url==='/' || req.url.startsWith('/assets/') || req.url.endsWith('.css') || req.url.endsWith('.js'))) return serve(req,res);
     if(req.method==='GET' && req.url==='/health') return json(res,200,{ok:true,service:'fizzl-ai-process-agent',status:'online'});
     if(req.method==='POST' && req.url==='/api/process-case') { const b=await body(req); const result=await processCase({message:b.message,knowledgeBase:KB}); cases.set(result.caseId,result); return json(res,200,result); }
-    if(req.method==='POST' && req.url==='/api/approve-action') { const b=await body(req); const result=cases.get(b.caseId); if(!result) return json(res,404,{error:'CASE_NOT_FOUND'}); const updated=approveCase(result); cases.set(updated.caseId,updated); return json(res,200,updated); }
+    if(req.method==='POST' && req.url==='/api/approve-action') { const b=await body(req); const result=cases.get(b.caseId); if(!result) return json(res,404,{error:'CASE_NOT_FOUND'}); const updated=approveCase(result, {reviewer:b.reviewer, reason:b.reason}); cases.set(updated.caseId,updated); return json(res,200,updated); }
     json(res,404,{error:'NOT_FOUND'});
   } catch(e) { json(res,400,{error:e.message || 'BAD_REQUEST'}); }
 });

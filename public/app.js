@@ -79,12 +79,20 @@ function render(d) {
         <div class="execution-title">${approved ? 'DEMO UITVOERING TOEGESTAAN' : 'UITVOERING GEBLOKKEERD'}</div>
         <div class="note">${approved ? 'De menselijke goedkeuring is gegeven. Deze demo voert niets echt uit.' : high ? 'Een medewerker moet eerst controleren en goedkeuren.' : 'Alleen veilige voorbereidende stappen zijn toegestaan.'}</div>
       </div>
-      ${d.decision.humanRequired && !approved ? '<button id="approve">GOEDKEUREN & DEMO UITVOEREN</button>' : ''}
+      ${d.decision.humanRequired && !approved ? `
+        <div class="approval-box">
+          <div class="approval-title">👤 Menselijke controle</div>
+          <label for="reviewer">Naam medewerker</label>
+          <input id="reviewer" value="Demo reviewer" maxlength="80">
+          <label for="approvalReason">Waarom keur je dit goed?</label>
+          <textarea id="approvalReason" rows="3" maxlength="300">De voorgestelde oplossing is gecontroleerd en mag in deze demo worden gesimuleerd.</textarea>
+          <button id="approve">GOEDKEUREN & DEMO UITVOEREN</button>
+        </div>` : ''}
     </section>
 
     <section class="audit">
       <h2>PROCESOVERZICHT</h2>
-      <div class="audit-list">${(d.auditLog || []).map(log => `<div><span>${formatTime(log.at)}</span><b>${auditText(log.event)}</b></div>`).join('')}</div>
+      <div class="audit-list">${(d.auditLog || []).map(log => `<div><span>${formatTime(log.at)}</span><b>${auditText(log.event)}${log.reviewer ? ' — ' + escapeHtml(log.reviewer) : ''}</b>${log.reason ? `<small>${escapeHtml(log.reason)}</small>` : ''}</div>`).join('')}</div>
     </section>
 
     <details class="technical"><summary>Technische details voor developers</summary><pre>${escapeHtml(JSON.stringify({analysis:d.analysis, decision:d.decision, actions:d.actions}, null, 2))}</pre></details>
@@ -117,11 +125,17 @@ function descriptionFor(type) {
 
 async function approveCase() {
   const button = $('approve');
+  const reviewer = $('reviewer')?.value.trim();
+  const reason = $('approvalReason')?.value.trim();
+  if (!reviewer || !reason) {
+    result.insertAdjacentHTML('afterbegin', '<div class="blocked">Vul naam en reden voor de goedkeuring in.</div>');
+    return;
+  }
   if (button) { button.disabled = true; button.textContent = 'WORDT GOEDGEKEURD…'; }
   try {
     const r = await fetch('/api/approve-action', {
       method:'POST', headers:{'content-type':'application/json'},
-      body:JSON.stringify({caseId:window.lastCase.caseId})
+      body:JSON.stringify({caseId:window.lastCase.caseId, reviewer, reason})
     });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error || 'Goedkeuring mislukt.');

@@ -36,3 +36,16 @@ test('high-risk policy check keeps correct action metadata',()=>{
   assert.equal(a[2].requiresHuman,true);
   assert.equal(a[2].status,'REQUIRED');
 });
+
+
+test('human approval records reviewer and reason',()=>{
+  const {approveCase}=require('../server/process-agent');
+  const result={caseId:'CASE-TEST',status:'AWAITING_HUMAN_REVIEW',decision:{humanRequired:true},actions:[{type:'EXECUTE_ACTION',status:'BLOCKED'}],auditLog:[]};
+  const updated=approveCase(result,{reviewer:'Frits',reason:'Ik heb de voorgestelde oplossing gecontroleerd.'});
+  assert.equal(updated.status,'APPROVED_DEMO_EXECUTION');
+  assert.equal(updated.approval.reviewer,'Frits');
+  assert.equal(updated.approval.reason,'Ik heb de voorgestelde oplossing gecontroleerd.');
+  assert.equal(updated.execution.result,'SIMULATED_SUCCESS');
+  assert.equal(updated.actions[0].status,'SIMULATED');
+  assert.equal(updated.auditLog.at(-1).event,'HUMAN_APPROVED');
+});
