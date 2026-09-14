@@ -8,12 +8,36 @@ const KB = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'knowledge', 'k
 const cases = new Map();
 const publicDir = path.join(__dirname, '..', 'public');
 
+// CORS: allow only configured production origins.
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'https://fizzl.eu')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
+
+function applyCors(req, res) {
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  }
+}
+
 function json(res, status, body) { res.writeHead(status, {'content-type':'application/json; charset=utf-8','cache-control':'no-store'}); res.end(JSON.stringify(body)); }
 function body(req) { return new Promise((resolve,reject)=>{let s=''; req.on('data',c=>{s+=c;if(s.length>20000) reject(new Error('payload too large'));});req.on('end',()=>{try{resolve(JSON.parse(s||'{}'));}catch(e){reject(e);}});}); }
 function serve(req,res) { const file = req.url === '/' ? 'index.html' : req.url.replace(/^\//,''); const safe = path.normalize(file).replace(/^\.\.(\/|\\)/,''); const target=path.join(publicDir,safe); if(!target.startsWith(publicDir) || !fs.existsSync(target)) return json(res,404,{error:'NOT_FOUND'}); const ext=path.extname(target); const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8'}; res.writeHead(200,{'content-type':types[ext]||'application/octet-stream'}); fs.createReadStream(target).pipe(res); }
 
 const server=http.createServer(async (req,res)=>{
+  applyCors(req, res);
+
   try {
+    if(req.method==='OPTIONS') {
+      if(req.headers.origin && !allowedOrigins.includes(req.headers.origin)) return json(res,403,{error:'CORS_FORBIDDEN'});
+      res.writeHead(204);
+      return res.end();
+    }
+
     if(req.method==='GET' && (req.url==='/' || req.url.startsWith('/assets/') || req.url.endsWith('.css') || req.url.endsWith('.js'))) return serve(req,res);
     if(req.method==='GET' && req.url==='/health') return json(res,200,{ok:true,service:'fizzl-ai-process-agent',status:'online'});
     if(req.method==='POST' && req.url==='/api/process-case') { const b=await body(req); const result=await processCase({message:b.message,knowledgeBase:KB}); cases.set(result.caseId,result); return json(res,200,result); }
