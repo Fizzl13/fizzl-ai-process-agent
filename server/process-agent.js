@@ -54,6 +54,9 @@ async function processCase({ message, knowledgeBase }) {
 
 function approveCase(result) {
   if (!result || !result.caseId) throw new Error('Invalid case');
+  if (!result.decision || !result.decision.humanRequired) {
+    throw new Error('HUMAN_REVIEW_NOT_REQUIRED');
+  }
   result.auditLog.push({event:'HUMAN_APPROVED', at:new Date().toISOString()});
   result.status = 'APPROVED_DEMO_EXECUTION';
   result.execution = { allowed:true, mode:'DEMO_ONLY', result:'SIMULATED_SUCCESS' };

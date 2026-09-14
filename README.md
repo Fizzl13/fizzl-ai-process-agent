@@ -28,3 +28,10 @@ Open `http://localhost:3000`.
 
 ## Render
 Use Node 18+ and start command `npm start`. Add `ANTHROPIC_API_KEY` and optionally `ANTHROPIC_MODEL` as environment variables.
+
+
+## v1.0.1 safety fix
+
+Financial complaint intents such as `klacht_over_onterechte_afschrijving` are treated as HIGH risk.
+The LLM may classify the case, but the deterministic Decision Engine controls the risk level and
+keeps financial/subscription execution blocked until human review.
