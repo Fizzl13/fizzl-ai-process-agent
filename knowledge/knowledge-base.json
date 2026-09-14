@@ -1,0 +1,8 @@
+{
+  "policies": [
+    {"topic":"human_control","text":"Belangrijke acties en daadwerkelijke uitvoering moeten door een mens worden gecontroleerd."},
+    {"topic":"subscription","text":"Het zelfstandig activeren of stopzetten van abonnementen is niet toegestaan zonder menselijke controle."},
+    {"topic":"confidentiality","text":"Vertrouwelijke informatie mag niet door de AI worden verwerkt in deze demo."},
+    {"topic":"customer_service","text":"Klanttevredenheid staat voorop. De klant moet zich gehoord voelen en het probleem moet daadwerkelijk worden aangepakt."}
+  ]
+}
