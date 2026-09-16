@@ -72,11 +72,11 @@ function render(d) {
       <div class="risk-badge ${d.decision.risk.toLowerCase()}">${riskText(d.decision.risk)}</div>
     </div>
 
-    <div class="reason">${escapeHtml(humanReason(d.decision))}</div>
+    <div class="reason">${escapeHtml(humanReason(d.decision, analysis))}</div>
 
     <section class="metrics">
-      <div><span>VERTROUWEN</span><strong>${confidencePercent(analysis.confidence)}</strong><small>AI-inschatting</small></div>
-      <div><span>MENSELIJKE CONTROLE</span><strong>${d.decision.humanRequired ? 'VEREIST' : 'NIET VEREIST'}</strong><small>op basis van risico en zekerheid</small></div>
+      <div class="metric-confidence ${lowConfidence(analysis) ? 'metric-alert' : ''}"><span>${lowConfidence(analysis) ? 'VERTROUWEN — LAAG' : 'VERTROUWEN'}</span><strong>${confidencePercent(analysis.confidence)}</strong><small>${lowConfidence(analysis) ? 'AI is onvoldoende zeker' : 'AI-inschatting'}</small></div>
+      <div class="metric-human ${d.decision.humanRequired ? 'metric-required' : ''}"><span>MENSELIJKE CONTROLE</span><strong>${d.decision.humanRequired ? 'VEREIST' : 'NIET VEREIST'}</strong><small>${lowConfidence(analysis) ? 'nodig vanwege lage AI-zekerheid' : 'op basis van risico en zekerheid'}</small></div>
       <div><span>UITVOERING</span><strong>${approved ? 'DEMO' : 'GEBLOKKEERD'}</strong><small>echte acties worden niet uitgevoerd</small></div>
     </section>
 
@@ -173,7 +173,13 @@ async function approveCase() {
 function confidencePercent(v) { const n = Math.round(Math.max(0, Math.min(1, Number(v || 0))) * 100); return n + '%'; }
 function riskText(risk) { return ({LOW:'Laag risico', MEDIUM:'Middel risico', HIGH:'Hoog risico'})[risk] || risk; }
 function humanStatus(s) { return ({AWAITING_HUMAN_REVIEW:'Wacht op menselijke controle', READY_FOR_HUMAN_CHECK:'Klaar voor controle', APPROVED_DEMO_EXECUTION:'Mens heeft goedgekeurd'})[s] || pretty(s); }
-function humanReason(d) { return d.risk === 'HIGH' ? 'Dit gaat over geld of een abonnement. Daarom mag de AI dit niet zelfstandig uitvoeren.' : d.reason || 'De AI kan dit veilig voorbereiden.'; }
+function lowConfidence(analysis) { return Number(analysis?.confidence || 0) < 0.75; }
+function humanReason(d, analysis) {
+  if (lowConfidence(analysis)) return 'Menselijke controle vereist vanwege lage AI-zekerheid. De AI is niet voldoende zeker van de analyse om zelfstandig door te gaan.';
+  if (d.risk === 'HIGH') return 'Dit gaat over geld of een abonnement. Daarom mag de AI dit niet zelfstandig uitvoeren.';
+  if (d.humanRequired) return d.reason || 'Een medewerker controleert de voorgestelde oplossing voordat er iets gebeurt.';
+  return d.reason || 'De AI kan dit veilig voorbereiden.';
+}
 function pretty(v) {
   const raw = String(v || 'Onbekend').trim();
   const normalized = raw.toLowerCase().replace(/[-\s]+/g, '_');
