@@ -1,3 +1,7 @@
+# FIZZL AI Process Agent v1.4.1
+
+Dutch-language polish release: commercial/high-risk decision reasons are now shown in Dutch and common AI intent labels are normalized for a cleaner demo presentation.
+
 # FIZZL AI Process Agent
 
 Standalone FIZZL portfolio project demonstrating controlled AI business-process automation with human-in-the-loop decision making.

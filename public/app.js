@@ -174,7 +174,23 @@ function confidencePercent(v) { const n = Math.round(Math.max(0, Math.min(1, Num
 function riskText(risk) { return ({LOW:'Laag risico', MEDIUM:'Middel risico', HIGH:'Hoog risico'})[risk] || risk; }
 function humanStatus(s) { return ({AWAITING_HUMAN_REVIEW:'Wacht op menselijke controle', READY_FOR_HUMAN_CHECK:'Klaar voor controle', APPROVED_DEMO_EXECUTION:'Mens heeft goedgekeurd'})[s] || pretty(s); }
 function humanReason(d) { return d.risk === 'HIGH' ? 'Dit gaat over geld of een abonnement. Daarom mag de AI dit niet zelfstandig uitvoeren.' : d.reason || 'De AI kan dit veilig voorbereiden.'; }
-function pretty(v) { return String(v || 'Onbekend').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()); }
+function pretty(v) {
+  const raw = String(v || 'Onbekend').trim();
+  const normalized = raw.toLowerCase().replace(/[-\s]+/g, '_');
+  const labels = {
+    abonnementen: 'Abonnementen',
+    abonnementsbeheer: 'Abonnementsbeheer',
+    upgrade_van_abonnement_aanvragen: 'Upgrade van abonnement aanvragen',
+    upgrade_van_abonnement: 'Upgrade van abonnement',
+    subscription_upgrade: 'Upgrade van abonnement',
+    offer: 'Aanbod',
+    klacht: 'Klacht',
+    facturatie: 'Facturatie',
+    onterechte_afschrijving_na_opzegging: 'Onterechte afschrijving na opzegging'
+  };
+  if (labels[normalized]) return labels[normalized];
+  return raw.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+}
 function formatTime(v) { try { return new Date(v).toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); } catch { return ''; } }
 function auditText(e) { return ({CASE_RECEIVED:'Klantvraag ontvangen',CASE_ANALYZED:'Klantvraag geanalyseerd',KNOWLEDGE_RETRIEVED:'Relevante informatie opgezocht',RISK_ASSESSED:'Risiconiveau bepaald',ACTION_PLAN_CREATED:'Stappenplan opgesteld',HUMAN_APPROVED:'Medewerker heeft goedgekeurd'})[e] || pretty(e); }
 function escapeHtml(v) { return String(v ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }

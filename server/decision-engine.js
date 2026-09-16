@@ -86,13 +86,13 @@ function buildDecision(caseData = {}) {
   let reason = 'Safe preparation only.';
 
   if (risk === RISK_LEVELS.HIGH) {
-    reason = 'High-risk financial or subscription case requires human control.';
+    reason = 'Dit gaat over geld of een abonnement. Daarom is menselijke controle vereist.';
   } else if (risk === RISK_LEVELS.MEDIUM) {
-    reason = 'Commercial action requires human review.';
+    reason = 'Een commerciële actie vereist menselijke controle.';
   } else if (lowConfidence) {
-    reason = 'AI confidence is below 0.75; human review required.';
+    reason = 'De AI heeft minder dan 75% vertrouwen; menselijke controle is vereist.';
   } else if (caseData.missingInformation === true) {
-    reason = 'Required information is missing.';
+    reason = 'Er ontbreekt informatie die nodig is om de vraag veilig te behandelen.';
   }
 
   return {
