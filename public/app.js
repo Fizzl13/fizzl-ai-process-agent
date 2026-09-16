@@ -1,6 +1,17 @@
 const $ = id => document.getElementById(id);
 const result = $('result');
 
+// Confirm the Render-hosted app can reach its own API.
+(async () => {
+  try {
+    const r = await fetch('/health', {cache:'no-store'});
+    if (!r.ok) throw new Error('offline');
+  } catch {
+    const pill = document.querySelector('.live-pill');
+    if (pill) pill.innerHTML = '<i style="background:#ff5151;box-shadow:0 0 12px #ff5151"></i> OFFLINE';
+  }
+})();
+
 const statusText = {
   PENDING: 'In afwachting',
   REQUIRED: 'Goedkeuring nodig',
